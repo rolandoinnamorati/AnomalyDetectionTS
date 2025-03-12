@@ -7,8 +7,8 @@ log_level: "INFO"
 data:
   raw_data_path: "data/raw/"
   processed_data_path: "data/processed/"
-#  train_split: 0.8  # 80% training, 20% testing
-  scaler: "StandardScaler"  # Alternative: MinMaxScaler
+  train_split: 0.8  # 80% training, 20% testing
+  scaler: "StandardScaler"
 
 # Model settings
 autoencoder:
@@ -22,7 +22,7 @@ autoencoder:
   optimizer: "adam"
   learning_rate: 0.001
   batch_size: 32
-#  epochs: 50
+  epochs: 50
 
 ## Forecasting model (to be combined with Autoencoder)
 #forecasting:

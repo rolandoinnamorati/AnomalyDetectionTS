@@ -1,10 +1,14 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config import config
 
-input_length = 20   # Rolling window length
-num_features = 14   # 4 temporal features + 10 for each data
-input_dim = input_length * num_features  # Total size of inputs
+input_length = config["autoencoder"]["window_size"]
+num_features = config["autoencoder"]["input_dim"]
+input_dim = input_length * num_features
 
 class TimeSeriesAutoencoder(nn.Module):
     def __init__(self):
