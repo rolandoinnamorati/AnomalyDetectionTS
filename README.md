@@ -35,3 +35,10 @@ cd anomaly-detection-ts
 pip install -r requirements.txt
 python models/train_autoencoder.py
 python scripts/detect_anomalies.py
+```
+
+## 📄 License  
+This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License**.  
+You can read the full license [here](https://creativecommons.org/licenses/by-nc/4.0/).  
+![CC BY-NC 4.0](https://licensebuttons.net/l/by-nc/4.0/88x31.png)
+
