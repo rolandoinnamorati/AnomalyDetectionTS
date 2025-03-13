@@ -16,3 +16,6 @@ ipykernel
 
 tensorflow-datasets
 dask
+
+python-decouple
+pymysql
