@@ -17,5 +17,6 @@ ipykernel
 tensorflow-datasets
 dask
 
-python-decouple
 pymysql
+cryptography
+python-dotenv
