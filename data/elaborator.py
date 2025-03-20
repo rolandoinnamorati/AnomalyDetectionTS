@@ -31,12 +31,13 @@ def create_connection():
                           cursorclass=pymysql.cursors.DictCursor,
                           connect_timeout=60)
 
+
 # Funzione per elaborare i dati di un singolo vehicle_id
 def process_vehicle(vehicle_id):
     try:
         # Crea una nuova connessione per questo thread
         connection = create_connection()
-        output_file = os.path.join(OUTPUT_DIR, f"{vehicle_id}.csv")
+        output_file = os.path.join(OUTPUT_DIR, f"{vehicle_id + 1000}.csv")
         query = f"SELECT * FROM gps_data_clean WHERE vehicle_id = {vehicle_id}"
         chunk_number = 0
 
@@ -65,6 +66,7 @@ try:
     # Connessione principale per ottenere i vehicle_id
     connection = create_connection()
     print("Connected to the database")
+    print(os.getenv('DATABASE_NAME'))
 
     # Query per contare il numero totale di righe nella tabella
     test_query = "SELECT COUNT(*) AS total FROM gps_data_clean"
@@ -74,7 +76,7 @@ try:
         print(f"Total rows in gps_data_clean: {result['total']}")
 
     # Query per ottenere tutti i vehicle_id distinti
-    query_vehicle_ids = "SELECT DISTINCT vehicle_id FROM gps_data_clean WHERE vehicle_id > 299"
+    query_vehicle_ids = "SELECT DISTINCT vehicle_id FROM gps_data_clean"
     with connection.cursor() as cursor:
         cursor.execute(query_vehicle_ids)
         vehicle_ids = cursor.fetchall()
