@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-INPUT_DIR = "data/processed"
+INPUT_DIR = "data/processed/normal"
 OUTPUT_DIR = "data/standardized"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
