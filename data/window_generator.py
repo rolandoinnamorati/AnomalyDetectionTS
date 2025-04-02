@@ -12,17 +12,48 @@ STRIDE = 5
 CHUNKSIZE = 100000
 THREADS = os.cpu_count()
 
+(OUTPUT_DIR / "raw").mkdir(parents=True, exist_ok=True)
 (OUTPUT_DIR / "normal").mkdir(parents=True, exist_ok=True)
 (OUTPUT_DIR / "anomalous").mkdir(parents=True, exist_ok=True)
 
-
 def calculate_window_features(window):
-    #TODO implementare il calcolo delle features di finestra
-    #Traveled Distance
-    #Speed Variation
-    #Elapsed Time
-    #Trajectory Change Rate ALTITUDE VARIATION IS BETTER?
-    return np.array([0.0, 0.0, 0.0, 0.0])  # Placeholder
+    """
+        Calcola le 4 metriche per una finestra 20x10.
+        Input: window (np.array 20x10) con colonne:
+            0: latitudine, 1: longitudine, 2: timestamp, 3: velocità,
+            4: altitudine, 5: satelliti, 6: segnale GSM,
+            7: volt_est, 8: volt_int, 9: batteria
+        Output: np.array [distanza, variazione_velocità, tempo, variazione_altitudine]
+        """
+    # 1. Distanza totale (metri) - Uso formula di Haversine
+    # lat_lon = np.radians(window[:, :2])  # Converti in radianti
+    # lat_diff = np.diff(lat_lon[:, 0])
+    # lon_diff = np.diff(lat_lon[:, 1])
+    # a = (np.sin(lat_diff / 2) ** 2 +
+    #      np.cos(lat_lon[:-1, 0]) * np.cos(lat_lon[1:, 0]) * np.sin(lon_diff / 2) ** 2)
+    # distanze = 6371e3 * 2 * np.arcsin(np.sqrt(a))  # Raggio terrestre in metri
+    # distanza_totale = np.sum(distanze)
+    distanza_totale = 0
+
+    # 2. Variazione di velocità (m/s²)
+    # velocita = window[:, 3] * 0.277778  # Converti km/h → m/s
+    # accelerazioni = np.diff(velocita) / np.diff(window[:, 2])  # Derivata prima
+    # variazione_velocita = np.mean(np.abs(accelerazioni))
+    variazione_velocita = 0
+
+    # 3. Tempo trascorso (secondi)
+    timestamps = np.array([
+        pd.Timestamp(t) if isinstance(t, str) and len(t) == 19
+        else pd.NaT
+        for t in window[:, 2]
+    ])
+    tempo_trascorso = (timestamps[-1] - timestamps[0]).total_seconds() if pd.notna(timestamps).all() else 0.0
+
+    # 4. Variazione altitudine (metri)
+    altitudini = window[:, 4]
+    variazione_altitudine = np.max(altitudini) - np.min(altitudini)
+
+    return np.array([distanza_totale, variazione_velocita, tempo_trascorso, variazione_altitudine])
 
 
 def process_chunk(chunk, file_stem, start_idx):
@@ -30,7 +61,7 @@ def process_chunk(chunk, file_stem, start_idx):
     for i in range(0, len(chunk) - WINDOW_SIZE + 1, STRIDE):
         window = chunk.iloc[i:i + WINDOW_SIZE].values
         features = calculate_window_features(window)
-        label = "normal"
+        label = "raw"
         windows_data.append((window, features, label, i + start_idx))
     return windows_data
 
@@ -54,7 +85,8 @@ def process_file(csv_path):
 
 
 def main():
-    csv_files = list(INPUT_DIR.glob("*.csv"))
+    # csv_files = list(INPUT_DIR.glob("*.csv"))
+    csv_files = list(INPUT_DIR.glob("10.csv"))
     print(f"Found {len(csv_files)} CSV files to process")
 
     with ThreadPoolExecutor(max_workers=THREADS) as executor:
