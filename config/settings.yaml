@@ -25,12 +25,11 @@ autoencoder:
   epochs: 50
 
 ## Forecasting model (to be combined with Autoencoder)
-#forecasting:
-#  model_type: "LSTM"  # Alternative: GRU, Transformer
-#  hidden_units: 64
-#  num_layers: 2
-#  dropout: 0.2
-#  learning_rate: 0.001
+forecasting:
+  window_size: 20
+  num_features: 10
+  global_features: 4
+  use_attention: True
 
 # Streaming settings
 streaming:
