@@ -4,6 +4,10 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from tqdm import tqdm
+from datetime import datetime
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts')))
+from utils import haversine
 
 INPUT_DIR = Path("data/processed")
 OUTPUT_DIR = Path("data/windows")
@@ -19,35 +23,28 @@ THREADS = os.cpu_count()
 def calculate_window_features(window):
     """
         Calcola le 4 metriche per una finestra 20x10.
-        Input: window (np.array 20x10) con colonne:
-            0: latitudine, 1: longitudine, 2: timestamp, 3: velocità,
-            4: altitudine, 5: satelliti, 6: segnale GSM,
-            7: volt_est, 8: volt_int, 9: batteria
+        Input: window (np.array 20x10)
         Output: np.array [distanza, variazione_velocità, tempo, variazione_altitudine]
         """
-    # 1. Distanza totale (metri) - Uso formula di Haversine
-    # lat_lon = np.radians(window[:, :2])  # Converti in radianti
-    # lat_diff = np.diff(lat_lon[:, 0])
-    # lon_diff = np.diff(lat_lon[:, 1])
-    # a = (np.sin(lat_diff / 2) ** 2 +
-    #      np.cos(lat_lon[:-1, 0]) * np.cos(lat_lon[1:, 0]) * np.sin(lon_diff / 2) ** 2)
-    # distanze = 6371e3 * 2 * np.arcsin(np.sqrt(a))  # Raggio terrestre in metri
-    # distanza_totale = np.sum(distanze)
-    distanza_totale = 0
+    # 1. Distanza totale (metri)
+    coords = [(row[0], row[1]) for row in window]
+    distanza_totale = 0.0
+    for i in range(len(coords) - 1):
+        lat1, lon1 = coords[i]
+        lat2, lon2 = coords[i + 1]
+        distanza_totale += haversine(lat1, lon1, lat2, lon2)
 
-    # 2. Variazione di velocità (m/s²)
-    # velocita = window[:, 3] * 0.277778  # Converti km/h → m/s
-    # accelerazioni = np.diff(velocita) / np.diff(window[:, 2])  # Derivata prima
-    # variazione_velocita = np.mean(np.abs(accelerazioni))
-    variazione_velocita = 0
+    # 2. Variazione di velocità (km/h)
+    velocita = [row[3] for row in window]
+    velocita_max = max(velocita)
+    velocita_min = min(velocita)
+    variazione_velocita = velocita_max - velocita_min
 
     # 3. Tempo trascorso (secondi)
-    timestamps = np.array([
-        pd.Timestamp(t) if isinstance(t, str) and len(t) == 19
-        else pd.NaT
-        for t in window[:, 2]
-    ])
-    tempo_trascorso = (timestamps[-1] - timestamps[0]).total_seconds() if pd.notna(timestamps).all() else 0.0
+    dates = [datetime.strptime(row[2], '%Y-%m-%d %H:%M:%S') for row in window]
+    min_date = min(dates)
+    max_date = max(dates)
+    tempo_trascorso = (max_date - min_date).total_seconds()
 
     # 4. Variazione altitudine (metri)
     altitudini = window[:, 4]
