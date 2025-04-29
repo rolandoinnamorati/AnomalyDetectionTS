@@ -27,14 +27,12 @@ The system combines two approaches for anomaly detection:
   - │── README.md # Documentation
   - │── .gitignore # Ignore unnecessary files
 
-## 🚀 Quick Start  
-1️⃣ **Clone the repository**  
+## 🚀 Quick Start
 ```bash
 git clone https://github.com/your-username/anomaly-detection-ts.git
 cd anomaly-detection-ts
 pip install -r requirements.txt
 python models/train_autoencoder.py
-python scripts/detect_anomalies.py
 ```
 
 ## 📄 License  

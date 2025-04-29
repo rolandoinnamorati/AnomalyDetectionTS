@@ -9,7 +9,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts')))
 from utils import haversine
 
-INPUT_DIR = Path("data/processed")
+INPUT_DIR = Path("data/ordered")
 OUTPUT_DIR = Path("data/windows")
 WINDOW_SIZE = 20
 STRIDE = 5
