@@ -10,8 +10,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 's
 from utils import haversine
 
 
-INPUT_DIR = Path("data/ordered")
-OUTPUT_DIR = Path("data/windows")
+INPUT_DIR = Path("ordered")
+OUTPUT_DIR = Path("windows")
 WINDOW_SIZE = 20
 STRIDE = 5
 CHUNKSIZE = 100000
