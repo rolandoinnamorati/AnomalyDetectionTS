@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import Pool
 from pathlib import Path
 from tqdm import tqdm
 from datetime import datetime
@@ -82,18 +82,18 @@ def process_file(csv_path):
 
 
 def main():
-    # csv_files = list(INPUT_DIR.glob("*.csv"))
-    csv_files = list(INPUT_DIR.glob("10.csv"))
+    csv_files = list(INPUT_DIR.glob("*.csv"))
     print(f"Found {len(csv_files)} CSV files to process")
 
-    with ThreadPoolExecutor(max_workers=THREADS) as executor:
-        futures = [executor.submit(process_file, csv) for csv in csv_files]
+    processes = int(os.environ['SLURM_CPUS_PER_TASK'])
+    print(f"Utilizing {processes} processes")
 
-        for future in tqdm(as_completed(futures), total=len(csv_files)):
-            result = future.result()
+    with Pool(processes=processes) as pool:
+        results = list(tqdm(pool.imap_unordered(process_file, csv_files), total=len(csv_files)))
+
+        for result in results:
             if "Error" in result:
                 print(result)
-
 
 if __name__ == "__main__":
     main()
