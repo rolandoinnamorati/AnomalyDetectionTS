@@ -9,9 +9,9 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts')))
 from utils import haversine
 
-
-INPUT_DIR = Path("ordered")
-OUTPUT_DIR = Path("windows")
+SCRIPT_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
+INPUT_DIR = SCRIPT_DIR / "ordered"
+OUTPUT_DIR = SCRIPT_DIR / "windows"
 WINDOW_SIZE = 20
 STRIDE = 5
 CHUNKSIZE = 100000
@@ -83,7 +83,7 @@ def process_file(csv_path):
 
 
 def main():
-    print(Path())
+    print(SCRIPT_DIR)
     print(INPUT_DIR)
     csv_files = list(INPUT_DIR.glob("*.csv"))
     print(f"Found {len(csv_files)} CSV files to process")
