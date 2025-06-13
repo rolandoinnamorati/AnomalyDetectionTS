@@ -22,8 +22,10 @@ class TimeSeriesForecaster(nn.Module):
         )
         self.lstm_dropout = nn.Dropout(0.1)
 
+        self.lstm_to_features = nn.Linear(64, self.num_features)
+
         # Attention
-        self.attention = nn.Sequential(
+        self.attention_weights_generator = nn.Sequential(
             nn.Linear(64, self.num_features),
             nn.Softmax(dim=1)
         )
@@ -38,18 +40,20 @@ class TimeSeriesForecaster(nn.Module):
         )
 
         # Fusion & Output
-        self.fusion = nn.Linear(64 + 4, 10)  # 64 (LSTM) + 4 (global) → 10 features
+        self.fusion = nn.Linear(10 + 4, 10)  # 64 (LSTM) + 4 (global) → 10 features
 
     def forward(self, x_time_series, x_global):
         lstm_out, _ = self.lstm(x_time_series)
-        lstm_out = lstm_out[:, -1, :]
-        lstm_out = self.lstm_dropout(lstm_out)
-        attn_weights = self.attention(lstm_out)
-        lstm_out = lstm_out * attn_weights.unsqueeze(1)
+        lstm_out_last_step = lstm_out[:, -1, :]
+        lstm_out_last_step = self.lstm_dropout(lstm_out_last_step)
+
+        lstm_features_projected = self.lstm_to_features(lstm_out_last_step)
+        attn_weights = self.attention_weights_generator(lstm_out_last_step)
+        lstm_final_output = lstm_features_projected * attn_weights
 
         global_out = self.global_net(x_global)
 
-        combined = torch.cat((lstm_out, global_out), dim=1)
+        combined = torch.cat((lstm_final_output, global_out), dim=1)
         output = self.fusion(combined)
 
         return output
