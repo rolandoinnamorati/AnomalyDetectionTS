@@ -4,15 +4,13 @@ import torch.optim as optim
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import config
 
 class TimeSeriesForecaster(nn.Module):
     def __init__(self):
         super(TimeSeriesForecaster, self).__init__()
 
-        self.window_size = config["forecasting"]["window_size"]
-        self.num_features = config["forecasting"]["num_features"]
-        self.global_features = config["forecasting"]["global_features"]
+        self.num_features = 10
+        self.global_features = 4
 
         # Branch 1 (Time Series (LSTM))
         self.lstm = nn.LSTM(
@@ -46,9 +44,8 @@ class TimeSeriesForecaster(nn.Module):
         lstm_out, _ = self.lstm(x_time_series)
         lstm_out = lstm_out[:, -1, :]
         lstm_out = self.lstm_dropout(lstm_out)
-        if config["forecasting"]["use_attention"]:
-            attn_weights = self.attention(lstm_out)
-            lstm_out = lstm_out * attn_weights.unsqueeze(1)
+        attn_weights = self.attention(lstm_out)
+        lstm_out = lstm_out * attn_weights.unsqueeze(1)
 
         global_out = self.global_net(x_global)
 
